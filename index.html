@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>H2B DealFlow — One-time import</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  body{font-family:system-ui,-apple-system,sans-serif;max-width:560px;margin:60px auto;padding:0 20px;color:#1F2A33}
+  h1{font-size:20px}
+  .card{border:1px solid #E1E5EA;border-radius:12px;padding:20px;margin-top:20px}
+  input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:6px 0 14px;box-sizing:border-box}
+  button{background:#B8923F;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-size:15px;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  #log{white-space:pre-wrap;font-family:monospace;font-size:13px;background:#f5f5f5;border-radius:8px;padding:12px;margin-top:16px;max-height:300px;overflow:auto}
+  .ok{color:#1B6B7D} .err{color:#B4372B}
+</style>
+</head>
+<body>
+<h1>H2B DealFlow — one-time data import</h1>
+<p>This loads your 7 projects, 22 tasks, and 5 team members into the live site's database. Sign in with any account your admin created in Firebase, then click Import. Safe to run only once — running it again will just overwrite these same records with the same data.</p>
+<div class="card">
+  <label>Email</label>
+  <input id="email" type="email" autocomplete="username">
+  <label>Password</label>
+  <input id="pass" type="password" autocomplete="current-password">
+  <button id="go">Sign in &amp; Import</button>
+  <div id="log"></div>
+</div>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDVUqw1gUoLJc9ISoNdP1IJwCGI8v4AfQ8",
+  authDomain: "h2b-tracker.firebaseapp.com",
+  projectId: "h2b-tracker",
+  storageBucket: "h2b-tracker.firebasestorage.app",
+  messagingSenderId: "767643249436",
+  appId: "1:767643249436:web:53f83e914212ce8a5be8d9"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const fs = firebase.firestore();
+
+const members = {
+ "m_sarah":{"name":"Brian Grossman","role":"Partner","email":"brian@h2bcapital.com","order":0,"initials":""},
+ "m_james":{"name":"Douglas McNeely","role":"Partner","email":"douglas@h2bcapital.com","order":1,"initials":"DM"},
+ "m_alex":{"name":"Layla Hasan","role":"Senior Associate","email":"layla@h2bcapital.com","order":2,"initials":""},
+ "m_emma":{"name":"Louis Azara","role":"Analyst","email":"louis@h2bcapital.com","order":3,"initials":""},
+ "mucxuz9dflpg2":{"name":"Henning Fog","role":"Chief Of Staff","email":"henning@h2bcapital.com","order":4,"initials":"","createdAt":1790097547009}
+};
+
+const projects = {
+"mucy494jhntw3":{"createdAt":1790097979699,"name":"Actions Capital","order":0,"region":"","size":"","stage":"identified","summary":"","target":"","team":[],"type":"Early Stage Venture Capital","updatedAt":1790099907940},
+"mucy6kqr89o6y":{"createdAt":1790098088067,"name":"One Lux Sol","order":1,"region":"","size":"","stage":"early","summary":"","target":"","team":["m_james"],"type":"","updatedAt":1790098274219},
+"mucyh18ql1lhm":{"createdAt":1790098576010,"name":"MarcyPen Capital Partners","order":2,"region":"North America","size":"","stage":"approached","summary":"","target":"","team":[],"type":"","updatedAt":1790098677044},
+"mucyklg7csa2z":{"createdAt":1790098742167,"name":"Greenlake","order":3,"region":"","size":"","stage":"identified","summary":"","target":"","team":[],"type":"","updatedAt":1790098742167},
+"mucyzjgqnu2pq":{"createdAt":1790099439434,"name":"General","order":4,"region":"","size":"","stage":"mucyz8hlmjp7o","summary":"","target":"","team":[],"type":"","updatedAt":1790099455731},
+"mucz4fxgdvlun":{"createdAt":1790099668132,"name":"Dynasty Equity","order":5,"region":"","size":"","stage":"mucyz8hlmjp7o","summary":"","target":"","team":[],"type":"","updatedAt":1790099687791},
+"mucz7or3h7eog":{"createdAt":1790099819535,"name":"Maryland","order":6,"region":"","size":"","stage":"identified","summary":"","target":"","team":["m_sarah"],"type":"","updatedAt":1790110534025}
+};
+
+const tasks = {
+"mucy5o5a6z20x":{"assignee":"m_emma","category":"dd","createdAt":1790098045822,"doneAt":1790098045822,"due":"","notes":"","priority":"High","projectId":"mucy494jhntw3","status":"Done","title":"Nexus Onboarding","updatedAt":1790098045822},
+"mucybdm0bqi7l":{"assignee":"m_james","category":"mucy7x05oy48o","createdAt":1790098312104,"doneAt":null,"due":"","notes":"Patricia to coordinate introduction","priority":"Medium","projectId":"mucy6kqr89o6y","status":"In Progress","title":"Schedule Meeting with Richard Cohen","updatedAt":1790098387882},
+"mucyeqij47byj":{"assignee":"mucxuz9dflpg2","category":"mucy7x05oy48o","createdAt":1790098468795,"doneAt":null,"due":"2026-10-12","notes":"","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Conference Preparation Meeting","updatedAt":1790098984760},
+"mucyglznkug5c":{"assignee":"m_emma","category":"dd","createdAt":1790098556243,"doneAt":null,"due":"","notes":"Upload upon receipt from Actions Capital","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Upload Latest Terms Sheet","updatedAt":1790100445879},
+"mucyhrj7km2d0":{"assignee":"m_alex","category":"ir","createdAt":1790098610083,"doneAt":null,"due":"2026-09-24","notes":"","priority":"Medium","projectId":"mucyh18ql1lhm","status":"In Progress","title":"Complete weekly MP materials","updatedAt":1790098610083},
+"mucyl7fdo9uz6":{"assignee":"m_emma","category":"dd","createdAt":1790098770649,"doneAt":null,"due":"2026-09-28","notes":"","priority":"Medium","projectId":"mucyklg7csa2z","status":"To Do","title":"Nexus Onboarding","updatedAt":1790098770649},
+"mucyqqc60w8yw":{"assignee":"m_emma","category":"general","createdAt":1790099028438,"doneAt":null,"due":"2026-10-12","notes":"","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Create Conference Preparation Meeting Materials","updatedAt":1790099028438},
+"mucyryj0u6sw1":{"assignee":"m_emma","category":"general","createdAt":1790099085708,"doneAt":1790099085708,"due":"","notes":"","priority":"Medium","projectId":"mucy6kqr89o6y","status":"Done","title":"Create Meeting Materials","updatedAt":1790099085708},
+"mucz1bf8smfar":{"assignee":"m_emma","category":"mucz22ex3ljmn","createdAt":1790099522324,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Define Targeting Profile","updatedAt":1790099578715},
+"mucz1vmp0o7qq":{"assignee":"m_emma","category":"mucz22ex3ljmn","createdAt":1790099548513,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Build Top 100 LP List","updatedAt":1790099584335},
+"mucz3ohmsh61i":{"assignee":"m_emma","category":"mucz22ex3ljmn","createdAt":1790099632570,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Build Outreach List","updatedAt":1790099632570},
+"mucz3zykara1j":{"assignee":"m_emma","category":"legal","createdAt":1790099647436,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucyh18ql1lhm","status":"To Do","title":"Build Outreach List","updatedAt":1790099647436},
+"mucz8v3zn81l2":{"assignee":"m_sarah","category":"legal","createdAt":1790099874431,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucz7or3h7eog","status":"To Do","title":"Confirm Proposal Status with Marlene Timberlake","updatedAt":1790099874431},
+"mucz9ar03sf8r":{"assignee":"m_sarah","category":"mucy7x05oy48o","createdAt":1790099894700,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucz7or3h7eog","status":"To Do","title":"Set Next Meeting","updatedAt":1790099894700},
+"muczm6jyuda3r":{"assignee":"m_emma","category":"mucz22ex3ljmn","createdAt":1790100495790,"doneAt":null,"due":"","notes":"","priority":"Medium","projectId":"mucyklg7csa2z","status":"To Do","title":"Define Targeting Profile","updatedAt":1790100495790},
+"mucznqhbo3twg":{"assignee":"m_emma","category":"muczntibjao4b","createdAt":1790100568271,"doneAt":1790100568271,"due":"2026-09-22","notes":"","priority":"Medium","projectId":"mucyzjgqnu2pq","status":"Done","title":"Update Overview Deck","updatedAt":1790100586168},
+"muczpbjy0chv7":{"assignee":"m_emma","category":"general","createdAt":1790100642238,"doneAt":null,"due":"2026-10-29","notes":"","priority":"Medium","projectId":"mucyh18ql1lhm","status":"To Do","title":"Duke Meeting Preparation","updatedAt":1790101952882},
+"muczr0yk0zevy":{"assignee":"m_emma","category":"general","createdAt":1790100721820,"doneAt":1790106337703,"due":"2026-09-22","notes":"","priority":"High","projectId":"mucyzjgqnu2pq","status":"Done","title":"Belle Avery Meeting Preparation","updatedAt":1790106337703},
+"muczrkx87qng4":{"assignee":"m_emma","category":"general","createdAt":1790100747692,"doneAt":1790106340154,"due":"2026-09-22","notes":"","priority":"High","projectId":"mucyzjgqnu2pq","status":"Done","title":"Robert Gaye Meeting Preparation","updatedAt":1790106340154},
+"mud00ntio8pd8":{"assignee":"m_sarah","category":"general","createdAt":1790101171350,"doneAt":null,"due":"2026-10-12","notes":"","priority":"Medium","projectId":"mucy494jhntw3","status":"To Do","title":"Finalize Conference Travel Plans","updatedAt":1790101171350},
+"mud0i53qw06r3":{"assignee":"m_emma","category":"general","createdAt":1790101986902,"doneAt":null,"due":"2026-10-22","notes":"","priority":"Medium","projectId":"mucz4fxgdvlun","status":"To Do","title":"Duke Meeting Preparation","updatedAt":1790101986902},
+"mud2nqfpqmakr":{"assignee":"m_alex","category":"muczntibjao4b","createdAt":1790105607061,"doneAt":null,"due":"2026-09-22","notes":"","priority":"High","projectId":"mucyzjgqnu2pq","status":"To Do","title":"Complete Data Room","updatedAt":1790105607061}
+};
+
+const config = {"categories":[{"id":"legal","name":"Legal"},{"id":"dd","name":"Stonehaven"},{"id":"mucy7x05oy48o","name":"Schedule Meeting"},{"id":"general","name":"Planning"},{"id":"ir","name":"Reporting"},{"id":"mucz22ex3ljmn","name":"Diligence"},{"id":"muczntibjao4b","name":"General"}],"stages":[{"id":"early","name":"Early Stage"},{"id":"identified","name":"Onboarding"},{"id":"approached","name":"Signed"},{"id":"closed","name":"Closed"},{"id":"declined","name":"Declined"},{"id":"mucyz8hlmjp7o","name":"General"}],"workspace":"DealFlow Pro"};
+
+const logEl = document.getElementById('log');
+function log(msg, cls){ logEl.innerHTML += `<div class="${cls||''}">${msg}</div>`; logEl.scrollTop = logEl.scrollHeight; }
+
+document.getElementById('go').addEventListener('click', async () => {
+  const btn = document.getElementById('go');
+  btn.disabled = true; logEl.innerHTML = '';
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  try {
+    log('Signing in as ' + email + ' …');
+    await auth.signInWithEmailAndPassword(email, pass);
+    log('Signed in.', 'ok');
+  } catch (e) {
+    log('Sign-in failed: ' + e.message, 'err');
+    btn.disabled = false;
+    return;
+  }
+  try {
+    for (const [id, data] of Object.entries(members)) {
+      await fs.collection('members').doc(id).set(data);
+      log('member: ' + data.name, 'ok');
+    }
+    for (const [id, data] of Object.entries(projects)) {
+      await fs.collection('projects').doc(id).set(data);
+      log('project: ' + data.name, 'ok');
+    }
+    for (const [id, data] of Object.entries(tasks)) {
+      await fs.collection('tasks').doc(id).set(data);
+      log('task: ' + data.title, 'ok');
+    }
+    await fs.doc('settings/config').set(config);
+    log('settings/config', 'ok');
+    log('DONE. All 5 members, 7 projects, and 22 tasks imported. You can close this page now.', 'ok');
+  } catch (e) {
+    log('Import error: ' + e.message + ' (code: ' + (e.code||'?') + ')', 'err');
+  }
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>
